@@ -219,6 +219,33 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Automatically reload files changed outside of Neovim
+local autoread_group = vim.api.nvim_create_augroup('kickstart-autoread', { clear = true })
+vim.api.nvim_create_autocmd({ 'FocusGained', 'TermClose', 'TermLeave', 'BufEnter' }, {
+  group = autoread_group,
+  desc = 'Trigger :checktime when regaining focus',
+  callback = function(args)
+    if vim.fn.getcmdwintype() ~= '' then
+      return
+    end
+    local buftype = vim.api.nvim_get_option_value('buftype', { buf = args.buf })
+    if buftype == '' then
+      vim.cmd 'checktime'
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd('FileChangedShellPost', {
+  group = autoread_group,
+  desc = 'Notify when a file is reloaded from disk',
+  callback = function(event)
+    local filename = event.file or vim.api.nvim_buf_get_name(0)
+    vim.notify(('File reloaded: %s'):format(vim.fn.fnamemodify(filename, ':~')), vim.log.levels.INFO, {
+      title = 'File changed on disk',
+    })
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -346,6 +373,7 @@ require('lazy').setup({
       spec = {
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
+        { '<leader>l', group = '[L]LM' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
       },
     },
@@ -672,7 +700,19 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         -- clangd = {},
-        gopls = {},
+        gopls = {
+          settings = {
+            gopls = {
+              gofumpt = true,
+              staticcheck = true,
+              usePlaceholders = true,
+              analyses = {
+                unusedparams = true,
+                shadow = true,
+              },
+            },
+          },
+        },
         pyright = {},
         ruff = {},
         -- rust_analyzer = {},
@@ -717,6 +757,8 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'gofumpt',
+        'goimports',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -769,6 +811,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        go = { 'gofumpt', 'goimports' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -950,6 +993,7 @@ require('lazy').setup({
       auto_install = true,
       highlight = {
         enable = true,
+        disable = { 'csv' },
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
@@ -985,6 +1029,50 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   {
     'voldikss/vim-floaterm',
+    cmd = { 'FloatermToggle' },
+    keys = {
+      { '<leader>t', '<cmd>FloatermToggle<CR>', desc = 'Toggle floating terminal' },
+    },
+  },
+
+  {
+    'mozanunal/sllm.nvim',
+    dependencies = { 'echasnovski/mini.nvim' },
+    config = function()
+      local has_pick, mini_pick = pcall(require, 'mini.pick')
+      if has_pick and mini_pick and not mini_pick.config then
+        mini_pick.setup()
+      end
+      local has_notify, mini_notify = pcall(require, 'mini.notify')
+      if has_notify and mini_notify and not mini_notify.config then
+        mini_notify.setup()
+      end
+
+      require('sllm').setup {
+        keymaps = {
+          ask_llm = '<leader>ls',
+          new_chat = '<leader>ln',
+          cancel = '<leader>lc',
+          focus_llm_buffer = '<leader>lf',
+          toggle_llm_buffer = '<leader>lt',
+          select_model = '<leader>lm',
+          add_file_to_ctx = '<leader>la',
+          add_url_to_ctx = '<leader>lu',
+          add_sel_to_ctx = '<leader>lv',
+          add_diag_to_ctx = '<leader>ld',
+          add_cmd_out_to_ctx = '<leader>lx',
+          add_tool_to_ctx = '<leader>lT',
+          add_func_to_ctx = '<leader>lF',
+          reset_context = '<leader>lr',
+        },
+      }
+    end,
+  },
+
+  {
+    'hat0uma/csvview.nvim',
+    opts = {},
+    cmd = { 'CsvViewEnable', 'CsvViewDisable', 'CsvViewToggle' },
   },
 
   --
