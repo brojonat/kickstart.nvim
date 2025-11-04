@@ -813,6 +813,7 @@ require('lazy').setup({
         lua = { 'stylua' },
         go = { 'gofumpt', 'goimports' },
         markdown = { 'prettier' },
+        conf = { 'prettier' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -1086,7 +1087,13 @@ require('lazy').setup({
     version = '*',
     dependencies = 'nvim-tree/nvim-web-devicons',
     config = function()
-      require('bufferline').setup {}
+      require('bufferline').setup {
+        options = {
+          numbers = function(opts)
+            return string.format('%s', opts.id)
+          end,
+        },
+      }
     end,
   },
 
