@@ -813,6 +813,7 @@ require('lazy').setup({
         lua = { 'stylua' },
         go = { 'gofumpt', 'goimports' },
         markdown = { 'prettier' },
+        conf = { 'prettier' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
