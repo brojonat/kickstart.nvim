@@ -155,6 +155,10 @@ vim.o.splitbelow = true
 vim.o.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
 
@@ -1211,6 +1215,61 @@ require('lazy').setup({
           end,
         },
       }
+    end,
+  },
+  { 'mbbill/undotree', keys = { { '<leader>u', mode = { 'n' }, vim.cmd.UndotreeToggle } } },
+  {
+    'ThePrimeagen/harpoon',
+    branch = 'harpoon2',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      require('harpoon').setup()
+    end,
+    keys = function()
+      local keys = {
+        {
+          mode = { 'n' },
+          'hm',
+          function()
+            require('harpoon').ui:toggle_quick_menu(require('harpoon'):list())
+          end,
+          desc = 'Open Harpoon list',
+        },
+        {
+          mode = { 'n' },
+          'hx',
+          function()
+            require('harpoon'):list():add()
+          end,
+          desc = 'Harpoon file',
+        },
+        {
+          mode = { 'n' },
+          'hn',
+          function()
+            require('harpoon'):list():next { ui_nav_warp = true }
+          end,
+          desc = 'Harpoon next',
+        },
+        {
+          mode = { 'n' },
+          'hp',
+          function()
+            require('harpoon'):list():prev { ui_nav_warp = true }
+          end,
+          desc = 'Harpoon previous',
+        },
+      }
+      for i = 1, 9 do
+        table.insert(keys, {
+          'h' .. i,
+          function()
+            require('harpoon'):list():select(i)
+          end,
+          desc = 'Harpoon to file ' .. i,
+        })
+      end
+      return keys
     end,
   },
 
