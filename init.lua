@@ -588,7 +588,8 @@ require('lazy').setup({
           -- Jump to the definition of the word under your cursor.
           --  This is where a variable was first declared, or where a function is defined, etc.
           --  To jump back, press <C-t>.
-          map('grd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+          map('gd', vim.lsp.buf.definition, '[G]oto [D]efinition') -- Direct jump to definition
+          map('grd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition (Telescope)')
 
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header.
@@ -719,6 +720,8 @@ require('lazy').setup({
               },
             },
           },
+          -- Explicitly set filetypes to ensure proper attachment
+          filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
         },
         pyright = {},
         ruff = {},
@@ -1074,7 +1077,8 @@ require('lazy').setup({
   },
 
   {
-    'mozanunal/sllm.nvim',
+    'brojonat/sllm.nvim',
+    branch = 'pre-hook',
     dependencies = { 'echasnovski/mini.nvim' },
     config = function()
       local has_pick, mini_pick = pcall(require, 'mini.pick')
@@ -1087,6 +1091,7 @@ require('lazy').setup({
       end
 
       require('sllm').setup {
+        default_model = 'claude-haiku-4.5',
         keymaps = {
           ask_llm = '<leader>ls',
           new_chat = '<leader>ln',
@@ -1102,6 +1107,12 @@ require('lazy').setup({
           add_tool_to_ctx = '<leader>lT',
           add_func_to_ctx = '<leader>lF',
           reset_context = '<leader>lr',
+        },
+        pre_hooks = {
+          {
+            command = 'context-vacuum generate',
+            add_to_context = true,
+          },
         },
       }
     end,
@@ -1270,6 +1281,20 @@ require('lazy').setup({
         })
       end
       return keys
+    end,
+  },
+
+  {
+    'greggh/claude-code.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim', -- Required for git operations
+    },
+    config = function()
+      require('claude-code').setup {
+        window = {
+          split_ratio = 0.5,
+        },
+      }
     end,
   },
 
