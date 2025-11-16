@@ -1078,7 +1078,6 @@ require('lazy').setup({
 
   {
     'brojonat/sllm.nvim',
-    branch = 'pre-hook',
     dependencies = { 'echasnovski/mini.nvim' },
     config = function()
       local has_pick, mini_pick = pcall(require, 'mini.pick')
@@ -1108,12 +1107,12 @@ require('lazy').setup({
           add_func_to_ctx = '<leader>lF',
           reset_context = '<leader>lr',
         },
-        pre_hooks = {
-          {
-            command = 'context-vacuum generate',
-            add_to_context = true,
-          },
-        },
+        -- pre_hooks = {
+        --   {
+        --     command = 'context-vacuum generate',
+        --     add_to_context = true,
+        --   },
+        -- },
       }
     end,
   },
