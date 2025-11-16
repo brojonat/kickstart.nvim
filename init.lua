@@ -1294,6 +1294,18 @@ require('lazy').setup({
         window = {
           split_ratio = 0.5,
         },
+        command_variants = {
+          continue = '--continue',
+          resume = '--resume',
+          danger = '--dangerously-skip-permissions',
+        },
+        keymaps = {
+          toggle = {
+            variants = {
+              danger = '<leader>cc',
+            },
+          },
+        },
       }
     end,
   },
